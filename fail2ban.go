@@ -41,7 +41,7 @@ func (m *Fail2Ban) Provision(ctx caddy.Context) error {
 }
 
 func (m *Fail2Ban) Match(req *http.Request) bool {
-	remote_ip, _, err := net.SplitHostPort(req.Header.Get("X-Forwarded-For"))
+	remote_ip, _, err := req.Header.Get("X-Forwarded-For")
 	if err != nil {
 		m.logger.Error("Error parsing remote addr into IP & port", zap.String("remote_addr", req.Header.Get("X-Forwarded-For")), zap.Error(err))
 		// Deny by default
