@@ -41,9 +41,24 @@ func (m *Fail2Ban) Provision(ctx caddy.Context) error {
 }
 
 func (m *Fail2Ban) Match(req *http.Request) bool {
-	remote_ip, _, err := net.SplitHostPort(req.RemoteAddr)
-	if err != nil {
-		m.logger.Error("Error parsing remote addr into IP & port", zap.String("remote_addr", req.RemoteAddr), zap.Error(err))
+	remote_ip := req.Header.Get("CF-Connecting-IP")
+	if remote_ip == "" {
+		remote_ip = req.Header.Get("X-Forwarded-For")
+	}
+
+	if remote_ip == "" {
+		host, _, err := net.SplitHostPort(req.RemoteAddr)
+		if err != nil {
+			m.logger.Error("Error parsing remote addr into IP & port", zap.String("remote_addr", req.RemoteAddr), zap.Error(err))
+			// Deny by default
+			return true
+		}
+		remote_ip = host
+	}
+
+	m.logger.Info(remote_ip)
+	if remote_ip == "" {
+		m.logger.Error("No remote address found in headers or RemoteAddr")
 		// Deny by default
 		return true
 	}
