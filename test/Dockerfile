@@ -1,4 +1,6 @@
-FROM caddy:2.7-builder AS builder
+FROM caddy:2.11.7-builder AS builder
+
+ENV GOTOOLCHAIN=auto
 
 COPY ./fail2ban.go /src/caddy-fail2ban/
 COPY ./banlist.go /src/caddy-fail2ban/
@@ -9,7 +11,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
   xcaddy build \
     --with github.com/iamasink/caddy-fail2ban=/src/caddy-fail2ban
 
-FROM caddy:2.7
+FROM caddy:2.11.7
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 
