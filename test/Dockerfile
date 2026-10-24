@@ -13,8 +13,8 @@ FROM caddy:2.7
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 
-RUN apk update && apk add fail2ban curl bash
-RUN rm /etc/fail2ban/jail.d/alpine-ssh.conf
+RUN apk upgrade --no-cache && apk add --no-cache fail2ban curl bash
+RUN rm -f /etc/fail2ban/jail.d/alpine-ssh.conf
 COPY ./fail2ban/caddy-banfile.conf /etc/fail2ban/action.d/caddy-banfile.conf
 COPY ./test/caddy-test.local /etc/fail2ban/jail.d/caddy-test.local
 COPY ./test/caddy-fail2ban-test.sh /usr/local/bin/

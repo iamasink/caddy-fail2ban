@@ -25,7 +25,10 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: go test -v ./...
+      run: go test -race -timeout 2m -v ./...
+
+    - name: Vet
+      run: go vet ./...
 
   integration_test:
     runs-on: ubuntu-latest
@@ -37,8 +40,7 @@ jobs:
 
     - name: Integration Test
       run: |
-        docker build -f test/Dockerfile . -t caddy-fail2ban
+        docker build --pull -f test/Dockerfile . -t caddy-fail2ban
+        trap 'docker logs caddy-fail2ban; docker stop caddy-fail2ban' EXIT
         docker run --rm --name caddy-fail2ban --detach -v $PWD/test/Caddyfile:/etc/caddy/Caddyfile caddy-fail2ban
         docker exec caddy-fail2ban /usr/local/bin/caddy-fail2ban-test.sh
-        docker logs caddy-fail2ban
-        docker stop caddy-fail2ban
